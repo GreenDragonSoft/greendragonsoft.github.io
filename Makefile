@@ -1,10 +1,18 @@
+index.html: index.template.html build/combined.css.min
+
+	# sed index.html "s/{{ INLINE_CSS }}/$(shell cat build/combined.css.min)/g" > index.html
+	sed index.template.html -e '/<!-- INLINE_CSS -->/ {' -e 'r build/combined.css.min' -e 'd' -e '}' > index.html
+
 .PHONY: all
-all: css/creative.css
+all: clean index.html
 
 .PHONY: clean
 clean:
-	rm css/creative.css
+	find build -type f -delete
 
+build/combined.css.min: build/combined.css
+	yui-compressor build/combined.css > build/combined.css.min
 
-css/creative.css: less/creative.less less/variables.less less/mixins.less
-	./node_modules/less/bin/lessc $< > $@
+build/combined.css: css/main.css css/normalize.css
+	cat css/main.css css/normalize.css > build/combined.css
+
